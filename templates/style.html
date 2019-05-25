@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html>
+<title>{% block title %}{% endblock %}</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.14.min.css">
+<link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.14.min.css">
+<link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-tables-0.12.14.min.css">
+
+<style>
+html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.rawgit.com/showdownjs/showdown/1.7.5/dist/showdown.min.js"></script>
+
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.14.min.js"></script>
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.14.min.js"></script>
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-tables-0.12.14.min.js"></script>
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-api-0.12.14.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bokeh/0.12.14/bokeh-gl.js"></script>
+<script type="text/javascript" src="https://unpkg.com/vtk.js"></script>
+
+<script type="text/javascript">
+	String.prototype.formatUnicorn = String.prototype.formatUnicorn ||
+function () {
+    "use strict";
+    var str = this.toString();
+    if (arguments.length) {
+        var t = typeof arguments[0];
+        var key;
+        var args = ("string" === t || "number" === t) ?
+            Array.prototype.slice.call(arguments)
+            : arguments[0];
+
+        for (key in args) {
+            str = str.replace(new RegExp("\\{" + key + "\\}", "gi"), args[key]);
+        }
+    }
+
+    return str;
+};
+</script>
+<body class="w3-light-grey">
+{% block body %}{% endblock %}
+</body>
+</html>

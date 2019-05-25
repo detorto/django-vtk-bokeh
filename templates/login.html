@@ -1,0 +1,31 @@
+
+{% extends "style.html" %}
+{% load widget_tweaks %}
+{% block title %}Article{% endblock %}
+
+
+{% block body %}
+<div class="w3-card-4 w3-half w3-display-topmiddle">
+<div class="w3-container w3-blue w3-center">
+  <h2>Вход</h2>
+</div>
+
+  <form class="w3-container w3-center" method="post" action="{{form.action}}">{% csrf_token %}
+    {% for field in form %}
+          <p>
+          <label>{{ field.label_tag }}</label>
+          {{ field|add_class:"w3-input" }}
+    {% endfor %}
+
+  {% if form.non_field_errors %}
+    {% for error in form.non_field_errors %}
+      <div class="w3-error w3-red"> {{ error }} </div>
+    {% endfor %}
+  {% endif %}
+
+    <p>
+    <button class="w3-btn w3-input w3-blue-grey">Войти</button>
+  </form>
+<div class="w3-card-2">
+
+{% endblock %}

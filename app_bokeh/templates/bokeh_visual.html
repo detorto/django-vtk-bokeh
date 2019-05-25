@@ -1,0 +1,101 @@
+{% extends "base_inner.html" %}
+
+{% block title %}Article-bokeh{% endblock %}
+
+{% block header %}Article-bokeh{% endblock %}
+
+{% block content %}
+
+<div class="w3-bar">
+  <h5><a href="/bokeh/" class="fa fa-step-backward w3-button"><b> Bokeh </b></a></h5>
+	</a>
+</div>
+
+<div class="w3-container" id="bokeh_vis">
+
+</div>
+
+<script type="text/javascript">
+var start_data;
+var stop_data;
+var start_redrawing;
+var stop_redrawing;
+var events_count=0;
+function get_bokeh_image()
+{
+  $.ajax({
+    url: "/bokeh/id/{{bokeh_id}}/image/",
+    dataType: "json",
+    success: function(data)
+    {
+      if(data.get)
+      {
+        $('#id_bokeh_img').append(data.get.div);
+        $('#id_bokeh_script').append(data.get.script);
+        stop_data = Date.now();
+      }
+    },
+    complete: function (data) {
+      statistic_load();
+     }
+  });
+}
+function statistic_load()
+{
+  $('#id_statistic_load').append('<p><span> Page load time: ' + String(stop_data - start_data) + ' ms<p><span>');
+}
+function statistic_redrawing()
+{
+  $('#id_statistic_redr').empty();
+  $('#id_statistic_redr').append('<p><span> Redrawing 1000 times: ' + String(stop_redrawing - start_redrawing) + ' ms<p><span>');
+}
+
+
+$(document).ready(function(){
+    $.ajax({
+            url: "/bokeh/json/?bokeh_id={{bokeh_id}}",
+            dataType: "json",
+
+            success: function(data){
+            var trHTML="";
+
+            if (data.error)
+            {
+              trHTML = '	<div class="w3-card-2 w3-container w3-row w3-white">\
+              <h3> Error </h3>\
+              </div>';
+              $('#bokeh_vis').append(trHTML);
+            }
+            else if (data.get.length == 0)
+            {
+              trHTML = '	<div class="w3-card-2 w3-container w3-row w3-white">\
+              <h3> No test exist </h3>\
+              </div>';
+              $('#bokeh_vis').append(trHTML);
+            }
+            else
+            {
+              var bokeh_vis = data.get[0];
+              trHTML +=
+               '<div class="w3-card-2 w3-container w3-row w3-white">\
+                     <div class="w3-col m2">\
+                     </div>\
+                     <div class="w3-col m10 w3-container">\
+                       <h4>'+ bokeh_vis.fields.title + '</h4>\
+                       <p><b>Description: </b>' + bokeh_vis.fields.description + '</p>\
+                       <div id="id_bokeh_img"> </div>\
+                       <div id="id_statistic_load"> </div>\
+                       <div id="id_statistic_redr"> </div>\
+                     </div>\
+               </div>\
+               <p>';
+               $('#bokeh_vis').append(trHTML);
+               start_data = Date.now();
+               get_bokeh_image();
+            }
+        }
+      });
+    });
+</script>
+<div id="id_bokeh_script"> </div>
+{% endblock %}

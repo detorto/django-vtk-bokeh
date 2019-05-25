@@ -1,0 +1,78 @@
+{% extends "base_inner.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Article - new VTK.js{% endblock %}
+
+{% block header %}Article - new VTK.js{% endblock %}
+
+{% block content %}
+<div class="w3-bar">
+    <h5><a href="/vtk/" class="fa fa-step-backward w3-button"><b> VTK.js </b></a></h5>
+    <h5><b><i class="fa fa-cube"></i> New VTK.js</b></h5>
+
+</div>
+
+<div class="w3-container" id="error">
+
+</div>
+
+<div class="w3-container">
+ <form class="w3-container" method="post" action="javascript:create_test();" id="form_1">
+  {% csrf_token %}
+    {% for field in form %}
+          <p>
+          <label>{{ field.label_tag }}</label>
+          {{ field|add_class:"w3-input" }}
+    {% endfor %}
+
+   <p>
+    <button class="w3-btn w3-input w3-blue-grey" onclick="submit">Create</button>
+  </form>
+</div>
+<script type="text/javascript">
+
+function create_test()
+{
+  $(document).ready(function(){
+    var form_data;
+    form_data = new FormData();
+
+    form_data.append( 'csrfmiddlewaretoken', '{{ csrf_token }}' );
+    form_data.append( 'inputfile', $('#id_inputfile').prop('files')[0] );
+    form_data.append( 'title', $('#id_title').val() );
+    form_data.append( 'description', $('#id_description').val() );
+    form_data.append( 'width', $('#id_width').val() );
+    form_data.append( 'height', $('#id_height').val() );
+
+    $.ajax({
+      type: 'POST',
+      url: '/vtk/json/',
+      data: form_data,
+      contentType: false,
+      processData: false,
+
+      success: function(data){
+        if (data.error)
+        {
+          $('#error').empty();
+          $('#error').append('	<div class="w3-card-2 w3-container w3-row w3-white">\
+        <h3> Error '+data.detail+'</h3>\
+        </div>');
+        }
+        else if (data.form_error) {
+          $('#error').empty();
+          $('#error').append('	<div class="w3-card-2 w3-container w3-row w3-white">\
+        <h3> Form error '+ JSON.stringify(data.form_error) +' </h3>\
+        </div>');
+        }
+        else
+        {
+          window.location.href = '/vtk/id/' + data.get[0].pk + '/';
+        }
+      }
+    });
+  });
+}
+
+</script>
+{% endblock %}

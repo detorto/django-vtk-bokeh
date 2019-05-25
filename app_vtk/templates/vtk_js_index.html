@@ -1,0 +1,67 @@
+{% extends "base_inner.html" %}
+
+{% block title %}Article-VTK.js{% endblock %}
+
+{% block header %}Article-VTK.js{% endblock %}
+
+{% block content %}
+
+<div class="w3-bar">
+  <div class="w3-bar-item"> <h5><b><i class="fa fa-cube"></i> VTK.js tests</b></h5> </div>
+  <a href="/vtk/form/" class="w3-bar-item w3-right w3-button">
+		<h5><b><i class="fa fa-plus"></i> New</b></h5>
+	</a>
+</div>
+
+<div class="w3-container" id="vtkjs_vis">
+
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function(){
+        $.ajax({
+            url: "/vtk/json/",
+            dataType: "json",
+
+            success: function(data){
+            var trHTML="";
+
+            if (data.error)
+            {
+             trHTML = '	<div class="w3-card-2 w3-container w3-row w3-white">\
+            <h3> Error </h3>\
+            </div>';
+
+            }
+            else if (data.get.length == 0)
+            {
+              trHTML = '	<div class="w3-card-2 w3-container w3-row w3-white">\
+              <h3> No test exist </h3>\
+              </div>';
+            }
+            else
+            {
+              $.each(data.get, function (i, vtkjs_vis) {
+                trHTML +=
+                '<a href="/vtk/id/'+vtkjs_vis.pk+'">\
+                 <div class="w3-card-2 w3-container w3-row w3-white w3-hover-gray">\
+                       <div class="w3-col m2">\
+                       </div>\
+                       <div class="w3-col m10 w3-container">\
+                         <h4>'+ vtkjs_vis.fields.title + '</h4>\
+                         <p><b>Description: </b>' + vtkjs_vis.fields.description + '</p>\
+                       </div>\
+                 </div>\
+                 </a>\
+                 <p>'
+              });
+            }
+
+          $('#vtkjs_vis').append(trHTML);
+
+            }});
+          });
+</script>
+
+{% endblock %}

@@ -1,0 +1,233 @@
+{% extends "base_inner.html" %}
+
+{% block title %}Article-VTK.js{% endblock %}
+
+{% block header %}Article-VTK.js{% endblock %}
+
+{% block content %}
+<script src="/static/vtk.js"></script>
+<div class="w3-bar">
+  <h5><a href="/vtk/" class="fa fa-step-backward w3-button"><b> VTK.js </b></a></h5>
+	</a>
+</div>
+
+<div class="w3-container">
+  <div class="w3-card-2 w3-container w3-row w3-white">
+    <div class="w3-col m2">
+    </div>
+    <div class="w3-col m10 w3-container">
+      <div id="vtkjs_vis"> </div>
+      <div id="id_vtkjs_img"> </div>
+      <div id="id_statistic_load"> </div>
+    </div>
+  </div>
+  <br>
+</div>
+
+<script type="text/javascript">
+var start_data;
+
+function collect_statistic()
+{
+  $('#id_statistic_load').append('<p><span> Page load time: ' + String(Date.now() - start_data) + ' ms<p><span>');
+}
+
+$(document).ready(function(){
+    $.ajax({
+            url: "/vtk/json/?vtkjs_id={{vtkjs_id}}",
+            dataType: "json",
+
+            success: function(data){
+            var trHTML="";
+
+            if (data.error)
+            {
+              $('#vtkjs_vis').append('<h3> Error </h3>');
+            }
+            else if (data.get.length == 0)
+            {
+              $('#vtkjs_vis').append('<h3> No test exist </h3>');
+            }
+            else
+            {
+              var vtkjs_vis = data.get[0];
+              trHTML +=
+               '<h4>'+ vtkjs_vis.fields.title + '</h4>\
+               <p><b>Description: </b>' + vtkjs_vis.fields.description + '</p>';
+               $('#vtkjs_vis').append(trHTML);
+               start_data = Date.now();
+               var img_place = document.getElementById('id_vtkjs_img');
+               img_place.style.width = String(vtkjs_vis.fields.width)+'px';
+               img_place.style.height = String(vtkjs_vis.fields.height)+'px';
+               generate_vtkjs_img();
+            }
+        }
+    });
+});
+function generate_vtkjs_img()
+{
+  const preset_raw = [{
+        "ColorSpace" : "Lab",
+        "Name" : "erdc_rainbow_bright",
+        "RGBPoints" : [
+           -1,
+           0.32549,
+           0.14902,
+           0.960784,
+           -0.866221,
+           0.297047,
+           0.375586,
+           0.963836,
+           -0.732441,
+           0.180302,
+           0.536818,
+           0.964627,
+           -0.598662,
+           0.1302,
+           0.649207,
+           0.929647,
+           -0.464883,
+           0.0445143,
+           0.749654,
+           0.855998,
+           -0.331104,
+           0.0271325,
+           0.830713,
+           0.721527,
+           -0.197324,
+           0.259504,
+           0.8661450000000001,
+           0.543555,
+           -0.0635452,
+           0.428364,
+           0.890725,
+           0.329819,
+           0.07023409999999999,
+           0.568503,
+           0.898508,
+           0.187623,
+           0.204013,
+           0.738259,
+           0.890317,
+           0.0825461,
+           0.337793,
+           0.84546,
+           0.86136,
+           0.0147555,
+           0.471572,
+           0.912191,
+           0.808018,
+           0,
+           0.605351,
+           0.962848,
+           0.710445,
+           0,
+           0.73913,
+           0.9994690000000001,
+           0.600258,
+           0.0176284,
+           0.87291,
+           0.994156,
+           0.445975,
+           0.193912,
+           1,
+           0.980407,
+           0.247105,
+           0.262699
+        ]
+     },];
+  const preset_map = Object.create(null);
+
+  preset_raw
+    .filter((p) => p.RGBPoints)
+    .filter((p) => p.ColorSpace !== 'CIELAB')
+    .forEach((p) => {
+      preset_map[p.Name] = p;
+    });
+
+  let background = [1.0,1.0,1.0];
+  const container = document.getElementById('id_vtkjs_img');
+  const fullScreenRenderer = vtk.Rendering.Misc.vtkFullScreenRenderWindow.newInstance({
+      background,
+      rootContainer: container,
+      containerStyle: { height: '100%', width: '100%', position: 'relative' }
+    });
+  const renderer = fullScreenRenderer.getRenderer();
+  const renderWindow = fullScreenRenderer.getRenderWindow();
+  const fpsMonitor = vtk.Interaction.UI.vtkFPSMonitor.newInstance();
+  const fpsElm = fpsMonitor.getFpsMonitorContainer();
+  fpsElm.style.position = 'relative';
+  fpsElm.style.left = '10px';
+  fpsElm.style.width = '60%'
+  fpsElm.style.bottom = '10px';
+  fpsElm.style.background = 'rgba(200,200,200,0.5)';
+  fpsElm.style.borderRadius = '5px';
+
+  fpsMonitor.setContainer(document.getElementById('id_statistic_load'));
+  fpsMonitor.setRenderWindow(renderWindow);
+
+  fullScreenRenderer.setResizeCallback(fpsMonitor.update);
+
+  $(document).ready(function(){
+      $.ajax({
+        url: "/vtk/id/{{vtkjs_id}}/data/",
+
+        success: function(data){
+          const reader = new FileReader();
+          reader.addEventListener("loadend", function() {
+            const poly_data = vtk.IO.XML.vtkXMLPolyDataReader.newInstance();
+            const lookupTable = vtk.Rendering.Core.vtkColorTransferFunction.newInstance();
+            let colorByArrayName = 'u_mod';
+            let colorMode = 1;
+            let scalarMode = 4;
+            let interpolateScalarsBeforeMapping = 0;
+            let scalarVisibility = 1;
+            let visibility = 1;
+            let representation = 2;
+            let edgeVisibility = 1;
+
+            poly_data.parseAsArrayBuffer(reader.result);
+            const source = poly_data.getOutputData(0);
+            const activeArray = source.getCellData().getArrayByName(colorByArrayName);
+            const dataRange = [].concat(activeArray ? activeArray.getRange() : [0, 1]);
+            lookupTable.setMappingRange(dataRange[0], dataRange[1]);
+            lookupTable.applyColorMap(preset_map['erdc_rainbow_bright']);
+            lookupTable.updateRange();
+
+            const mapper = vtk.Rendering.Core.vtkMapper.newInstance({
+                interpolateScalarsBeforeMapping: false,
+                useLookupTableScalarRange: true,
+                lookupTable,
+                scalarVisibility: false,
+              });
+
+            const actor = vtk.Rendering.Core.vtkActor.newInstance();
+            actor.getProperty().set({ representation, edgeVisibility });
+            actor.setVisibility(!!visibility);
+            mapper.setInputData(source);
+
+            mapper.set({
+                colorByArrayName,
+                colorMode,
+                interpolateScalarsBeforeMapping,
+                scalarMode,
+                scalarVisibility,
+              });
+            actor.setMapper(mapper);
+            renderer.addActor(actor);
+
+            renderer.resetCamera();
+            renderer.updateLightsGeometryToFollowCamera();
+            renderWindow.render();
+            collect_statistic();
+        });
+        var bl = new Blob([data],{type:'application/force-download'});
+        reader.readAsArrayBuffer(bl);
+
+      }
+     });
+  })
+};
+</script>
+
+{% endblock %}

@@ -1,0 +1,6 @@
+django
+django-annoying
+django-widget-tweaks
+bokeh
+vtk
+requests
